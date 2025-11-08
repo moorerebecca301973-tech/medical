@@ -17,29 +17,17 @@
 out/
 gen/
 
-# Visual Studio Code
-.vscode/
+# Android/IntelliJ
+.gradle/
+build/
+local.properties
+/android/key.properties
 
-# Flutter/Dart
-.dart_tool/
+# Flutter
+.metadata
 .packages
-.pub-cache/
-.pub/
-/build/
-*.apk
-*.aab
-*.app
-*.ipa
-*.zip
-*.keystore
-*.jks
-
-#ignore native build folder
-/android/build/
-/ios/build/
-/ios/Pods/
-/ios/.symlinks/
-
-#ignore generated files
-*.g.dart
-*.freezed.dart
+.flutter-plugins
+.flutter-plugins-dependencies
+ios/
+android/
+build/
