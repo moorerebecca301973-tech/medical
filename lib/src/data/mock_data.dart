@@ -38,6 +38,7 @@ final List<Patient> mockPatients = [
     gender: 'Female',
     condition: 'Hypertension',
     assignedDoctor: '1', // Doctor ID
+    status: 'Admitted',
   ),
   Patient(
     id: '2',
@@ -46,6 +47,7 @@ final List<Patient> mockPatients = [
     gender: 'Male',
     condition: 'Diabetes',
     assignedDoctor: '2', // Doctor ID
+    status: 'Stable',
   ),
   Patient(
     id: '3',
@@ -54,6 +56,7 @@ final List<Patient> mockPatients = [
     gender: 'Male',
     condition: 'Arthritis',
     assignedDoctor: '1', // Doctor ID
+    status: 'Discharged',
   ),
 ];
 

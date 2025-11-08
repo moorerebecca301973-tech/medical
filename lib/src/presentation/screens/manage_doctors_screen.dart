@@ -10,287 +10,96 @@ class ManageDoctorsScreen extends StatefulWidget {
 }
 
 class _ManageDoctorsScreenState extends State<ManageDoctorsScreen> {
-  late List<Doctor> _doctors;
   late List<Doctor> _filteredDoctors;
-  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
+  String? _selectedStatus;
 
   @override
   void initState() {
     super.initState();
-    _doctors = mockDoctors;
-    _filteredDoctors = _doctors;
-    _searchController.addListener(_filterDoctors);
+    _filteredDoctors = mockDoctors;
   }
 
   void _filterDoctors() {
-    final query = _searchController.text.toLowerCase();
     setState(() {
-      _filteredDoctors = _doctors.where((doctor) {
-        return doctor.name.toLowerCase().contains(query) ||
-            doctor.specialization.toLowerCase().contains(query);
+      _filteredDoctors = mockDoctors.where((doctor) {
+        final nameMatches = doctor.name.toLowerCase().contains(_searchQuery.toLowerCase());
+        final specMatches = doctor.specialization.toLowerCase().contains(_searchQuery.toLowerCase());
+        final statusMatches = _selectedStatus == null || doctor.status == _selectedStatus;
+
+        return (nameMatches || specMatches) && statusMatches;
       }).toList();
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    final allStatuses = mockDoctors.map((d) => d.status).toSet().toList();
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Manage Doctors')),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            _buildSearchBar(),
-            const SizedBox(height: 16),
-            _buildDoctorList(),
-          ],
-        ),
+      appBar: AppBar(
+        title: const Text('Manage Doctors'),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _showAddDoctorDialog(),
-        child: const Icon(Icons.add),
-      ),
-    );
-  }
-
-  Widget _buildSearchBar() {
-    return TextField(
-      controller: _searchController,
-      decoration: InputDecoration(
-        labelText: 'Search Doctors',
-        prefixIcon: const Icon(Icons.search),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDoctorList() {
-    return Expanded(
-      child: ListView.builder(
-        itemCount: _filteredDoctors.length,
-        itemBuilder: (context, index) {
-          final doctor = _filteredDoctors[index];
-          return Card(
-            margin: const EdgeInsets.symmetric(vertical: 8),
-            child: ListTile(
-              leading: CircleAvatar(
-                child: Text(doctor.name[0]),
-              ),
-              title: Text(doctor.name),
-              subtitle: Text(doctor.specialization),
-              trailing: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.edit),
-                    onPressed: () => _showEditDoctorDialog(doctor),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.delete),
-                    onPressed: () => _showDeleteConfirmationDialog(doctor),
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  void _showAddDoctorDialog() {
-    final formKey = GlobalKey<FormState>();
-    final nameController = TextEditingController();
-    final emailController = TextEditingController();
-    final phoneController = TextEditingController();
-    final specializationController = TextEditingController();
-
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Add New Doctor'),
-          content: Form(
-            key: formKey,
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  TextFormField(
-                    controller: nameController,
-                    decoration: const InputDecoration(labelText: 'Name'),
-                    validator: (value) =>
-                        value!.isEmpty ? 'Please enter a name' : null,
-                  ),
-                  TextFormField(
-                    controller: emailController,
-                    decoration: const InputDecoration(labelText: 'Email'),
-                    validator: (value) {
-                      if (value!.isEmpty) return 'Please enter an email';
-                      if (!value.contains('@')) return 'Enter a valid email';
-                      return null;
-                    },
-                  ),
-                  TextFormField(
-                    controller: phoneController,
-                    decoration: const InputDecoration(labelText: 'Phone'),
-                    validator: (value) =>
-                        value!.isEmpty ? 'Please enter a phone number' : null,
-                  ),
-                  TextFormField(
-                    controller: specializationController,
-                    decoration: const InputDecoration(labelText: 'Specialization'),
-                    validator: (value) =>
-                        value!.isEmpty ? 'Please enter a specialization' : null,
-                  ),
-                ],
-              ),
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Cancel'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                if (formKey.currentState!.validate()) {
-                  final newDoctor = Doctor(
-                    id: (_doctors.length + 1).toString(),
-                    name: nameController.text,
-                    email: emailController.text,
-                    phone: phoneController.text,
-                    specialization: specializationController.text,
-                    status: 'Active',
-                  );
-                  setState(() {
-                    _doctors.add(newDoctor);
-                    _filterDoctors();
-                  });
-                  Navigator.of(context).pop();
-                }
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: TextField(
+              onChanged: (value) {
+                _searchQuery = value;
+                _filterDoctors();
               },
-              child: const Text('Add'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _showEditDoctorDialog(Doctor doctor) {
-    final formKey = GlobalKey<FormState>();
-    final nameController = TextEditingController(text: doctor.name);
-    final emailController = TextEditingController(text: doctor.email);
-    final phoneController = TextEditingController(text: doctor.phone);
-    final specializationController =
-        TextEditingController(text: doctor.specialization);
-
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Edit Doctor'),
-          content: Form(
-            key: formKey,
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  TextFormField(
-                    controller: nameController,
-                    decoration: const InputDecoration(labelText: 'Name'),
-                    validator: (value) =>
-                        value!.isEmpty ? 'Please enter a name' : null,
-                  ),
-                  TextFormField(
-                    controller: emailController,
-                    decoration: const InputDecoration(labelText: 'Email'),
-                    validator: (value) {
-                      if (value!.isEmpty) return 'Please enter an email';
-                      if (!value.contains('@')) return 'Enter a valid email';
-                      return null;
-                    },
-                  ),
-                  TextFormField(
-                    controller: phoneController,
-                    decoration: const InputDecoration(labelText: 'Phone'),
-                    validator: (value) =>
-                        value!.isEmpty ? 'Please enter a phone number' : null,
-                  ),
-                  TextFormField(
-                    controller: specializationController,
-                    decoration: const InputDecoration(labelText: 'Specialization'),
-                    validator: (value) =>
-                        value!.isEmpty ? 'Please enter a specialization' : null,
-                  ),
-                ],
+              decoration: const InputDecoration(
+                labelText: 'Search by name or specialization',
+                prefixIcon: Icon(Icons.search),
+                border: OutlineInputBorder(),
               ),
             ),
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Cancel'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                if (formKey.currentState!.validate()) {
-                  final updatedDoctor = Doctor(
-                    id: doctor.id,
-                    name: nameController.text,
-                    email: emailController.text,
-                    phone: phoneController.text,
-                    specialization: specializationController.text,
-                    status: doctor.status,
-                  );
-
-                  setState(() {
-                    final index = _doctors.indexWhere((d) => d.id == doctor.id);
-                    if (index != -1) {
-                      _doctors[index] = updatedDoctor;
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: Wrap(
+              spacing: 8.0,
+              children: allStatuses.map((status) {
+                return ChoiceChip(
+                  label: Text(status),
+                  selected: _selectedStatus == status,
+                  onSelected: (isSelected) {
+                    setState(() {
+                      _selectedStatus = isSelected ? status : null;
                       _filterDoctors();
-                    }
-                  });
-                  Navigator.of(context).pop();
-                }
+                    });
+                  },
+                );
+              }).toList(),
+            ),
+          ),
+          Expanded(
+            child: ListView.builder(
+              itemCount: _filteredDoctors.length,
+              itemBuilder: (context, index) {
+                final doctor = _filteredDoctors[index];
+                return Card(
+                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: ListTile(
+                    leading: CircleAvatar(
+                      child: Text(doctor.name[0]),
+                    ),
+                    title: Text(doctor.name),
+                    subtitle: Text(doctor.specialization),
+                    trailing: Text(
+                      doctor.status,
+                      style: TextStyle(
+                        color: doctor.status == 'Active' ? Colors.green : Colors.orange,
+                      ),
+                    ),
+                  ),
+                );
               },
-              child: const Text('Save'),
             ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _showDeleteConfirmationDialog(Doctor doctor) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Delete Doctor'),
-          content: Text('Are you sure you want to delete ${doctor.name}?'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              style: TextButton.styleFrom(foregroundColor: Colors.red),
-              onPressed: () {
-                setState(() {
-                  _doctors.removeWhere((d) => d.id == doctor.id);
-                  _filterDoctors();
-                });
-                Navigator.of(context).pop();
-              },
-              child: const Text('Delete'),
-            ),
-          ],
-        );
-      },
+          ),
+        ],
+      ),
     );
   }
 }

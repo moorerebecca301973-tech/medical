@@ -5,6 +5,7 @@ class Patient {
   final String gender;
   final String condition;
   final String assignedDoctor;
+  final String status;
   final bool alert;
 
   Patient({
@@ -14,6 +15,7 @@ class Patient {
     required this.gender,
     required this.condition,
     required this.assignedDoctor,
+    required this.status,
     this.alert = false,
   });
 
@@ -25,6 +27,7 @@ class Patient {
       gender: json['gender'],
       condition: json['condition'],
       assignedDoctor: json['assigned_doctor'],
+      status: json['status'],
       alert: json['alert'] ?? false,
     );
   }
@@ -37,6 +40,7 @@ class Patient {
       'gender': gender,
       'condition': condition,
       'assigned_doctor': assignedDoctor,
+      'status': status,
       'alert': alert,
     };
   }

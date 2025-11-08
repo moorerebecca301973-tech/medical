@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:myapp/src/data/mock_data.dart';
 
 class AdminDashboardScreen extends StatelessWidget {
   const AdminDashboardScreen({super.key});
@@ -38,12 +39,12 @@ class AdminDashboardScreen extends StatelessWidget {
   }
 
   Widget _buildStatsCards(BuildContext context) {
-    return const Row(
+    return Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
-        _StatCard(label: 'Doctors', value: '12', icon: Icons.medical_services),
-        _StatCard(label: 'Patients', value: '150', icon: Icons.people),
-        _StatCard(label: 'Alerts', value: '5', icon: Icons.warning),
+        _StatCard(label: 'Doctors', value: mockDoctors.length.toString(), icon: Icons.medical_services),
+        _StatCard(label: 'Patients', value: mockPatients.length.toString(), icon: Icons.people),
+        const _StatCard(label: 'Alerts', value: '5', icon: Icons.warning),
       ],
     );
   }
@@ -109,7 +110,7 @@ class AdminDashboardScreen extends StatelessWidget {
               child: Icon(Icons.person_add),
             ),
             title: const Text('New Doctor Added'),
-            subtitle: const Text('Dr. John Doe - Cardiology'),
+            subtitle: Text('Dr. ${mockDoctors.last.name} - ${mockDoctors.last.specialization}'),
             trailing: Text('2 hours ago', style: Theme.of(context).textTheme.bodySmall),
           ),
         ),
@@ -119,7 +120,7 @@ class AdminDashboardScreen extends StatelessWidget {
               child: Icon(Icons.assignment_turned_in),
             ),
             title: const Text('Patient Assigned'),
-            subtitle: const Text('Jane Smith to Dr. John Doe'),
+            subtitle: Text('${mockPatients.last.name} to Dr. ${mockDoctors.first.name}'),
             trailing: Text('5 hours ago', style: Theme.of(context).textTheme.bodySmall),
           ),
         ),
